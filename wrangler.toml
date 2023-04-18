@@ -1,0 +1,6 @@
+name = "astronaut"
+main = "index.js"
+compatibility_date = "2023-04-15"
+
+[vars]
+FUZZY_RESULT_LIMIT = 200
