@@ -57,6 +57,7 @@ router.get(API_VER + "add_missing/:ean", async ({ params }) => {
   const results = await conn.execute("INSERT INTO Missing (ean) VALUES (?)", [
     params.ean,
   ]);
+  conn.execute("COMMIT");
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
