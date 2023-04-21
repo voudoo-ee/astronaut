@@ -53,6 +53,13 @@ router.get(API_VER + "get_ean/:ean", async ({ params }) => {
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
+router.get(API_VER + "add_missing/:ean", async ({ params }) => {
+  const results = await conn.execute("INSERT INTO Missing (ean) VALUES (?)", [
+    params.ean,
+  ]);
+  return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
+});
+
 router.all("*", () => new Response("Not Found.", { status: 404 }));
 
 addEventListener("fetch", (event) =>
