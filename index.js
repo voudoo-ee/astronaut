@@ -10,8 +10,11 @@ const config = {
 const API_VER = "/api/v1/";
 const router = Router();
 const conn = connect(config);
-const SELECTOR =
+const SELECT_SELECTOR =
   "ID, name, ean, store, price, brand, is_discount, is_age_restricted, weight, unit_price, url, category, image_url, price_difference_float, price_difference_percentage";
+
+const INSERT_SELECTOR =
+  "name, ean, store, price, brand, is_discount, is_age_restricted, weight, unit_price, url, category, image_url";
 const HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Content-Type": "application/json",
@@ -20,7 +23,7 @@ const HEADERS = {
 router.get(API_VER + "get_fuzzy/:query", async ({ params }) => {
   const results = await conn.execute(
     "SELECT " +
-      SELECTOR +
+      SELECT_SELECTOR +
       " FROM Matches WHERE MATCH(name, brand) AGAINST(?) LIMIT ?",
     [params.query, FUZZY_RESULT_LIMIT]
   );
@@ -35,7 +38,7 @@ router.get(API_VER + "get_random/:count", async ({ params }) => {
 
   const results = await conn.execute(
     "SELECT " +
-      SELECTOR +
+      SELECT_SELECTOR +
       " FROM Matches WHERE price_difference_percentage > 10 ORDER BY RAND() LIMIT ?",
     [RANDOM_COUNT]
   );
@@ -45,7 +48,7 @@ router.get(API_VER + "get_random/:count", async ({ params }) => {
 router.get(API_VER + "get_ean/:ean", async ({ params }) => {
   const results = await conn.execute(
     "SELECT " +
-      SELECTOR +
+      SELECT_SELECTOR +
       ", disregard" +
       " FROM Products WHERE ean = ? LIMIT 1",
     [params.ean]
@@ -54,11 +57,11 @@ router.get(API_VER + "get_ean/:ean", async ({ params }) => {
 });
 
 router.get(API_VER + "add_missing/:ean", async ({ params }) => {
-  const results = await conn.execute("INSERT INTO Missing (ean) VALUES (?)", [
+  await conn.execute("INSERT IGNORE INTO Missing (ean) VALUES (?)", [
     params.ean,
   ]);
-  conn.execute("COMMIT");
-  return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
+  await conn.execute("COMMIT;");
+  return new Response("OK!", { headers: HEADERS, status: 200 });
 });
 
 router.all("*", () => new Response("Not Found.", { status: 404 }));
