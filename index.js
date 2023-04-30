@@ -56,6 +56,10 @@ router.get(API_VER + "get_ean/:ean", async ({ params }) => {
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
+router.get(API_VER + "status", async () => {
+  return new Response("OK!", { headers: HEADERS, status: 200 });
+});
+
 router.get(API_VER + "add_missing/:ean", async ({ params }) => {
   await conn.execute("INSERT IGNORE INTO Missing (ean) VALUES (?)", [
     params.ean,
