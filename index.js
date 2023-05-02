@@ -7,20 +7,17 @@ const config = {
   password: DB_PASSWORD,
 };
 
-const API_VER = "/api/v1/";
-const router = Router();
+const router = Router({ base: "/api/v1" });
 const conn = connect(config);
 const SELECT_SELECTOR =
   "ID, name, ean, store, price, brand, is_discount, is_age_restricted, weight, unit_price, url, category, image_url, price_difference_float, price_difference_percentage";
 
-const INSERT_SELECTOR =
-  "name, ean, store, price, brand, is_discount, is_age_restricted, weight, unit_price, url, category, image_url";
 const HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Content-Type": "application/json",
 };
 
-router.get(API_VER + "get_fuzzy/:query", async ({ params }) => {
+router.get("/get_fuzzy/:query", async ({ params }) => {
   const results = await conn.execute(
     "SELECT " +
       SELECT_SELECTOR +
@@ -30,7 +27,7 @@ router.get(API_VER + "get_fuzzy/:query", async ({ params }) => {
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
-router.get(API_VER + "get_random/:count", async ({ params }) => {
+router.get("/get_random/:count", async ({ params }) => {
   const RANDOM_COUNT = parseInt(params.count);
   if (RANDOM_COUNT > 25) {
     return new Response("Too many results requested.", { status: 400 });
@@ -45,26 +42,27 @@ router.get(API_VER + "get_random/:count", async ({ params }) => {
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
-router.get(API_VER + "get_ean/:ean", async ({ params }) => {
+router.get("/get_ean/:ean/:store", async ({ params }) => {
   const results = await conn.execute(
     "SELECT " +
       SELECT_SELECTOR +
       ", disregard" +
-      " FROM Products WHERE ean = ? LIMIT 1",
-    [params.ean]
+      " FROM Products WHERE (ean = ? AND store = ?) LIMIT 1",
+    [params.ean, params.store]
   );
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
 });
 
-router.get(API_VER + "status", async () => {
+router.get("/add_missing/:ean/:store", async ({ params }) => {
+  await conn.execute("INSERT IGNORE INTO Missing (ean, store) VALUES (?, ?)", [
+    params.ean,
+    params.store,
+  ]);
+  await conn.execute("COMMIT;");
   return new Response("OK!", { headers: HEADERS, status: 200 });
 });
 
-router.get(API_VER + "add_missing/:ean", async ({ params }) => {
-  await conn.execute("INSERT IGNORE INTO Missing (ean) VALUES (?)", [
-    params.ean,
-  ]);
-  await conn.execute("COMMIT;");
+router.get("/status", async () => {
   return new Response("OK!", { headers: HEADERS, status: 200 });
 });
 
