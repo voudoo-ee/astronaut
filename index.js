@@ -36,7 +36,10 @@ router.get("/get_random/:count", async ({ params }) => {
   const results = await conn.execute(
     "SELECT " +
       SELECT_SELECTOR +
-      " FROM Matches WHERE price_difference_percentage > 10 ORDER BY RAND() LIMIT ?",
+      " FROM Matches JOIN (SELECT (SELECT MAX(ID) FROM Matches WHERE price_difference_percentage > 10) * RAND() AS rand_id) r" +
+      " WHERE ID >= r.rand_id AND price_difference_percentage > 10" +
+      " ORDER BY ID ASC " +
+      "LIMIT ?",
     [RANDOM_COUNT]
   );
   return new Response(JSON.stringify(results["rows"]), { headers: HEADERS });
