@@ -1,22 +1,26 @@
 {
-  "name": "astronaut",
-  "version": "1.0.0",
-  "author": {
-    "name": "chaos",
-    "email": "",
-    "url": "https://github.com/qtchaos"
-  },
-  "devDependencies": {
-    "wrangler": "^2.15.1"
-  },
-  "scripts": {
-      "build": "wrangler build",
-      "dev": "wrangler dev --local",
-      "publish": "wrangler publish --minify"
-  },
-  "private": true,
-  "dependencies": {
-    "itty-router": "^3.0.12",
-    "@planetscale/database": "1.6.0"
-  }
+    "name": "astronaut",
+    "version": "1.0.0",
+    "author": {
+        "name": "chaos",
+        "email": "",
+        "url": "https://github.com/qtchaos"
+    },
+    "devDependencies": {
+        "prettier": "^2.8.8",
+        "wrangler": "^2.15.1"
+    },
+    "scripts": {
+        "build": "wrangler build",
+        "dev": "wrangler dev --local",
+        "publish": "wrangler publish --minify",
+        "prettier:format": "prettier --plugin-search-dir . --write .",
+        "prettier:check": "prettier --plugin-search-dir . --check . && eslint ."
+    },
+    "private": true,
+    "dependencies": {
+        "@planetscale/database": "1.6.0",
+        "@prisma/client": "^4.15.0",
+        "itty-router": "^3.0.12"
+    }
 }
